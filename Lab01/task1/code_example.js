@@ -18,7 +18,7 @@ function createUserManager() {
         add: function(name, email) {
             var user = {id: users.length + 1, name: name, email: email};
             users.push(user);
-            return user:
+            return user ;
         }
     }
 }
@@ -43,4 +43,4 @@ var UserManager = (function() {
             return instance;
         }
     }
-})():
+})();
