@@ -1,0 +1,48 @@
+GitHub Repository URL: https://github.com/nurayka67/javascript 
+Student Name: Nuray Koshan
+Student ID: SE ao 2 course
+Date: 28.01.2026
+
+1. Questions I asked the AI ASSISTANT(deepseek):
+
+- "Explain design patterns in simple terms"
+- "What is the Rule of Three in pattern context?"
+- "How to distinguish a real pattern from a proto-pattern?"
+- "Show me a Factory Pattern example in JavaScript"
+- "How to create a module pattern with private variables?"
+- "How to apply factory pattern to a shopping cart system?"
+
+2. How I used this information:
+
+- Understood basic pattern concepts
+- Learned to analyze code for patterns
+- Understood Rule of Three criteria
+- Successfully identified 3 code structures in provided code
+- Wrote my own analysis using acquired knowledge
+- Created my own code examples inspired by explanations but not copied
+
+3. Code I wrote independently:
+
+- All analysis in analysis.md (my own conclusions)
+- File and folder structure
+- Code comments and documentation\
+- Pattern documentation
+- Pattern adaptation for new scenario (shopping cart)
+
+4. WHAT I LEARNED FROM THIS EXPERIENCE:
+
+- Now understand patterns are reusable solutions to common problems
+- Learned to differentiate between patterns and proto-patterns
+- Understood how closures create private variables in JavaScript
+- Recognized advantages of factory functions over global objects
+- Appreciated the importance of data encapsulation
+
+5. ACADEMIC INTEGRITY CONFIRMATION:
+
+I confirm that:
+- All code was written by me manually
+- AI was used only as a reference tool for concept explanations
+- No IDE agents were used (Copilot, Cursor AI, etc.)
+- No AI-generated code was copied
+- All code examples were adapted and rewritten by me independently
+- I completed the full learning process and understand each pattern used

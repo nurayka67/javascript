@@ -1,0 +1,28 @@
+{
+  "name": "lab-02-design-patterns",
+  "version": "1.0.0",
+  "description": "Lab 02: Pattern Testing & Rule of Three - JavaScript Design Patterns Assignment",
+  "main": "test_all.js",
+  "scripts": {
+    "start": "node test_all.js",
+    "test": "npm run task1 && npm run task2",
+    "task1": "cd task1 && echo '=== TASK 1: Rule of Three ===' && node object_literal.js && node constructor_function.js && node module_pattern.js",
+    "task2": "cd task2 && echo '=== TASK 2: Pattern Tests ===' && node data_validator.js",
+    "validate": "node task2/data_validator.js",
+    "analysis": "echo 'Review analysis files: task1/rule_of_three_analysis.md and task2/*.md'",
+    "clean": "echo 'No cleanup needed'"
+  },
+  "keywords": [
+    "javascript",
+    "design-patterns",
+    "lab",
+    "education",
+    "rule-of-three",
+    "pattern-testing"
+  ],
+  "author": "Student Name",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
