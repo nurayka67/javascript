@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo App - Lab 5.2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #exportBtn {
+            width: 100%;
+            margin-bottom: 20px;
+            background: #28a745;
+        }
+        #exportBtn:hover {
+            background: #218838;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .todo-item span {
+            flex: 1;
+        }
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .delete-btn {
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        #lazySection {
+            margin-top: 400px;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stats {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .stat-box {
+            flex: 1;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo App</h1>
+        
+        <div class="input-group">
+            <input type="text" id="todoInput" placeholder="Enter todo...">
+            <button id="addBtn">Add</button>
+        </div>
+        
+        <button id="exportBtn">Export (Dynamic Import)</button>
+        
+        <div id="todoList"></div>
+        
+        <div id="lazySection">
+            <h3>Statistics (Dynamic Import on Visibility)</h3>
+            <p>↓ Scroll down ↓</p>
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <script type="module" src="modules/app.mjs"></script>
+</body>
+</html>
