@@ -28,3 +28,20 @@ Todo application demonstrating ES6 modules with static and dynamic imports.
 ## Error Handling
 - try/catch blocks for failed dynamic imports
 - User-friendly error messages
+
+
+## How to Run (for the examiner)
+
+### Method 1 - Using HTTP Server (recommended)
+```bash
+# Open terminal in task2 folder
+cd C:\Users\Asus\Downloads\jsadv\javascript\Lab05\task2
+
+# Start a simple HTTP server
+npx http-server
+
+# OR if you have Python:
+python -m http.server 8000
+
+# OR if you have Node.js:
+npx serve
