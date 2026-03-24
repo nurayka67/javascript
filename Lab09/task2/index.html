@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Home</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .panel { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        .output { background: #1e1e1e; color: #0f0; padding: 10px; font-family: monospace; height: 300px; overflow-y: auto; }
+        .status { background: #e9ecef; padding: 10px; border-radius: 4px; margin-bottom: 10px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Smart Home System</h1>
+    
+    <div class="panel">
+        <h3>Devices</h3>
+        <div id="status" class="status">No devices</div>
+        <button id="addLight">Add Light</button>
+        <button id="addSecurity">Add Security</button>
+    </div>
+    
+    <div class="panel">
+        <h3>Commands</h3>
+        <button id="turnOn">Turn Light ON</button>
+        <button id="turnOff">Turn Light OFF</button>
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+        <button id="arm">Arm Security</button>
+        <button id="addRule">Add Rule (Arm = Light ON)</button>
+    </div>
+    
+    <div class="panel">
+        <h3>Console</h3>
+        <div id="output" class="output"></div>
+    </div>
+
+    <script type="module">
+        import { HomeMediator } from './mediator/HomeMediator.js';
+        import { Light } from './devices/Light.js';
+        import { SecuritySystem } from './devices/SecuritySystem.js';
+        import { TurnOnLightCommand, TurnOffLightCommand } from './commands/LightCommands.js';
+        import { CommandManager } from './commands/CommandManager.js';
+
+        const output = document.getElementById('output');
+        const originalLog = console.log;
+        console.log = function() {
+            let args = Array.from(arguments);
+            originalLog.apply(console, args);
+            output.innerHTML += args.join(' ') + '<br>';
+            output.scrollTop = output.scrollHeight;
+        };
+
+        let mediator = new HomeMediator();
+        let cmdManager = new CommandManager();
+        let light = null;
+        let security = null;
+
+        function updateStatus() {
+            let html = '';
+            if (light) html += 'Light: ' + (light.getState().power ? 'ON' : 'OFF') + '<br>';
+            if (security) html += 'Security: ' + (security.getState().armed ? 'ARMED' : 'DISARMED') + '<br>';
+            if (!light && !security) html = 'No devices';
+            document.getElementById('status').innerHTML = html;
+        }
+
+        document.getElementById('addLight').onclick = () => {
+            if (!light) {
+                light = new Light('Living Light', 'Living Room');
+                mediator.registerDevice(light);
+                updateStatus();
+                console.log('Light added');
+            }
+        };
+
+        document.getElementById('addSecurity').onclick = () => {
+            if (!security) {
+                security = new SecuritySystem('Front Security');
+                mediator.registerDevice(security);
+                updateStatus();
+                console.log('Security added');
+            }
+        };
+
+        document.getElementById('turnOn').onclick = () => {
+            if (light) {
+                cmdManager.execute(new TurnOnLightCommand(light));
+                updateStatus();
+            } else {
+                console.log('No light! Add Light first');
+            }
+        };
+
+        document.getElementById('turnOff').onclick = () => {
+            if (light) {
+                cmdManager.execute(new TurnOffLightCommand(light));
+                updateStatus();
+            } else {
+                console.log('No light! Add Light first');
+            }
+        };
+
+        document.getElementById('undo').onclick = () => {
+            cmdManager.undo();
+            updateStatus();
+        };
+
+        document.getElementById('redo').onclick = () => {
+            cmdManager.redo();
+            updateStatus();
+        };
+
+        document.getElementById('arm').onclick = () => {
+            if (security) {
+                security.arm();
+                updateStatus();
+            } else {
+                console.log('No security! Add Security first');
+            }
+        };
+
+        document.getElementById('addRule').onclick = () => {
+            mediator.addRule(
+                (sender, state) => sender.type === 'security' && state.armed === true,
+                (m) => {
+                    let lightDevice = m.getDevice('Living Light');
+                    if (lightDevice) {
+                        console.log('[Auto] Security armed! Turning on light');
+                        cmdManager.execute(new TurnOnLightCommand(lightDevice));
+                        updateStatus();
+                    }
+                }
+            );
+            console.log('Rule added');
+        };
+
+        console.log('Ready! Add Light first');
+    </script>
+</body>
+</html>
