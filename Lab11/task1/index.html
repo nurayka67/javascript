@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lab 11.1 - Async Patterns</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    button { margin: 5px; padding: 8px 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    .card { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 8px; }
+    .success { background: #d4edda; padding: 10px; border-radius: 4px; }
+    .error { background: #f8d7da; padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Lab 11.1: Promise Patterns & Retry Logic</h1>
+  
+  <div class="card">
+    <h2>HTTP Client</h2>
+    <button id="getPosts">Get Posts (JSONPlaceholder)</button>
+    <button id="getUsers">Get Users</button>
+    <div id="httpResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Retry Logic (Exponential Backoff)</h2>
+    <button id="retrySuccess">Success (no retry)</button>
+    <button id="retryFail">Fail (will retry 3x)</button>
+    <div id="retryResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Async Queue (Concurrency=2)</h2>
+    <button id="runQueue">Run 10 Tasks (2 at a time)</button>
+    <div id="queueStats"></div>
+    <div id="queueResult"></div>
+  </div>
+
+  <script type="module">
+    import { PromiseHttpClient, HttpError } from './async/PromiseHttpClient.js';
+    import { withRetry, withTimeout } from './async/retry.js';
+    import { AsyncQueue } from './async/AsyncQueue.js';
+
+    // HTTP Client Demo
+    const client = new PromiseHttpClient('https://jsonplaceholder.typicode.com');
+    
+    document.getElementById('getPosts').onclick = async () => {
+      const div = document.getElementById('httpResult');
+      div.innerHTML = 'Loading...';
+      try {
+        const posts = await client.get('/posts?_limit=3');
+        div.innerHTML = `<div class="success">✅ Success!<br><pre>${JSON.stringify(posts, null, 2)}</pre></div>`;
+      } catch (e) {
+        div.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
+      }
+    };
+
+    document.getElementById('getUsers').onclick = async () => {
+      const div = document.getElementById('httpResult');
+      div.innerHTML = 'Loading...';
+      try {
+        const users = await client.get('/users?_limit=2');
+        div.innerHTML = `<div class="success">✅ Users!<br><pre>${JSON.stringify(users, null, 2)}</pre></div>`;
+      } catch (e) {
+        div.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
+      }
+    };
+
+    // Retry Demo
+    document.getElementById('retrySuccess').onclick = async () => {
+      const div = document.getElementById('retryResult');
+      div.innerHTML = 'Loading...';
+      try {
+        const result = await withRetry(async () => {
+          const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+          return res.json();
+        });
+        div.innerHTML = `<div class="success">✅ Success after retry!<br><pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+      } catch (e) {
+        div.innerHTML = `<div class="error">❌ Failed: ${e.message}</div>`;
+      }
+    };
+
+    document.getElementById('retryFail').onclick = async () => {
+      const div = document.getElementById('retryResult');
+      div.innerHTML = 'Attempting with retry...';
+      try {
+        await withRetry(async () => {
+          const res = await fetch('https://httpbin.org/status/500');
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        });
+      } catch (e) {
+        div.innerHTML = `<div class="error">❌ All retries failed: ${e.message}</div>`;
+      }
+    };
+
+    // Async Queue Demo
+    document.getElementById('runQueue').onclick = async () => {
+      const queue = new AsyncQueue(2);
+      const results = [];
+      
+      for (let i = 1; i <= 10; i++) {
+        queue.add(async () => {
+          await new Promise(r => setTimeout(r, Math.random() * 1000));
+          results.push(`Task ${i} done at ${new Date().toLocaleTimeString()}`);
+          return `Task ${i}`;
+        });
+      }
+      
+      await queue.addAll([]);
+      
+      setTimeout(() => {
+        const stats = queue.getStats();
+        document.getElementById('queueStats').innerHTML = `
+          <div class="success">
+            ✅ Completed: ${stats.completed}<br>
+            ❌ Failed: ${stats.failed}<br>
+            📋 Pending: ${stats.pending}<br>
+            🏃 Running: ${stats.running}
+          </div>
+        `;
+        document.getElementById('queueResult').innerHTML = `<pre>${results.join('\n')}</pre>`;
+      }, 2000);
+    };
+  </script>
+</body>
+</html>
