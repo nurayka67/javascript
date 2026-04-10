@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.1 - Module Systems</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 10px; }
+        .subtitle { color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 30px; }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .card h3 { color: #764ba2; margin: 15px 0 10px 0; }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { transform: translateY(-2px); }
+        .output {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Lab 12.1: Module Systems & Namespace Injection</h1>
+        <p class="subtitle">AMD | CommonJS | UMD</p>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>AMD Module <span class="badge">Asynchronous</span></h2>
+                <button onclick="testAMDUnique()">unique()</button>
+                <button onclick="testAMDFlatten()">flatten()</button>
+                <button onclick="testAMDCapitalize()">capitalize()</button>
+                <button onclick="testAMDTrim()">trim()</button>
+                <div id="amd-output" class="output">Ready...</div>
+            </div>
+            
+            <div class="card">
+                <h2>CommonJS Module <span class="badge">Synchronous</span></h2>
+                <button onclick="testCJSUnique()">unique()</button>
+                <button onclick="testCJSGroupBy()">groupBy()</button>
+                <button onclick="testCJSChunk()">chunk()</button>
+                <button onclick="testCJSSlugify()">slugify()</button>
+                <button onclick="testCJSPick()">pick()</button>
+                <div id="cjs-output" class="output">Ready...</div>
+            </div>
+            
+            <div class="card">
+                <h2>UMD Module <span class="badge">Universal</span></h2>
+                <button onclick="testUMDEventEmitter()">EventEmitter</button>
+                <button onclick="testUMDUnique()">unique()</button>
+                <button onclick="testUMDTemplate()">template()</button>
+                <button onclick="testUMDMerge()">merge()</button>
+                <div id="umd-output" class="output">Ready...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
+    
+    <script>
+        // ============= AMD Module =============
+        var AMDMyLib = (function($, _) {
+            var MyLib = {};
+            MyLib.namespace = function(ns) {
+                var parts = ns.split('.');
+                var parent = MyLib;
+                if (parts[0] === 'MyLib') parts = parts.slice(1);
+                for (var i = 0; i < parts.length; i++) {
+                    if (!parent[parts[i]]) parent[parts[i]] = {};
+                    parent = parent[parts[i]];
+                }
+                return parent;
+            };
+            MyLib.namespace('utils.array');
+            MyLib.namespace('utils.string');
+            MyLib.namespace('dom.element');
+            MyLib.utils = MyLib.utils || {};
+            MyLib.utils.array = MyLib.utils.array || {};
+            MyLib.utils.string = MyLib.utils.string || {};
+            MyLib.dom = MyLib.dom || {};
+            MyLib.dom.element = MyLib.dom.element || {};
+            
+            MyLib.utils.array.unique = function(arr) { return _.uniq(arr); };
+            MyLib.utils.array.flatten = function(arr) { return _.flatten(arr); };
+            MyLib.utils.string.capitalize = function(str) { return str.charAt(0).toUpperCase() + str.slice(1); };
+            MyLib.utils.string.trim = function(str) { return str.replace(/^\s+|\s+$/g, ''); };
+            MyLib.dom.element.create = function(tag, attrs) {
+                var el = document.createElement(tag);
+                for (var key in attrs) el.setAttribute(key, attrs[key]);
+                return el;
+            };
+            MyLib.version = '1.0.0';
+            return MyLib;
+        })(window.jQuery, window._);
+        
+        // ============= CommonJS Module =============
+        var CJSMyLib = (function() {
+            function namespace(ns) {
+                var parts = ns.split('.');
+                var parent = MyLib;
+                if (parts[0] === 'MyLib') parts = parts.slice(1);
+                for (var i = 0; i < parts.length; i++) {
+                    if (!parent[parts[i]]) parent[parts[i]] = {};
+                    parent = parent[parts[i]];
+                }
+                return parent;
+            }
+            var MyLib = { version: '1.0.0', namespace: namespace };
+            namespace('utils.array'); namespace('utils.string'); namespace('utils.object'); namespace('dom.element');
+            MyLib.utils = MyLib.utils || {};
+            MyLib.utils.array = MyLib.utils.array || {};
+            MyLib.utils.string = MyLib.utils.string || {};
+            MyLib.utils.object = MyLib.utils.object || {};
+            MyLib.dom = MyLib.dom || {};
+            MyLib.dom.element = MyLib.dom.element || {};
+            
+            MyLib.utils.array.unique = function(arr) { return [...new Set(arr)]; };
+            MyLib.utils.array.groupBy = function(arr, key) {
+                return arr.reduce(function(acc, item) {
+                    var group = typeof key === 'function' ? key(item) : item[key];
+                    if (!acc[group]) acc[group] = [];
+                    acc[group].push(item);
+                    return acc;
+                }, {});
+            };
+            MyLib.utils.array.chunk = function(arr, size) {
+                var chunks = [];
+                for (var i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+                return chunks;
+            };
+            MyLib.utils.string.slugify = function(str) {
+                return str.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
+            };
+            MyLib.utils.object.pick = function(obj, keys) {
+                return keys.reduce(function(acc, key) {
+                    if (obj.hasOwnProperty(key)) acc[key] = obj[key];
+                    return acc;
+                }, {});
+            };
+            MyLib.utils.object.omit = function(obj, keys) {
+                var result = {};
+                Object.keys(obj).forEach(function(key) {
+                    if (keys.indexOf(key) === -1) result[key] = obj[key];
+                });
+                return result;
+            };
+            return MyLib;
+        })();
+        
+        // ============= UMD Module =============
+        var UMDMyLib = (function($, _) {
+            var MyLib = {};
+            MyLib.namespace = function(ns) {
+                var parts = ns.split('.');
+                var parent = MyLib;
+                if (parts[0] === 'MyLib') parts = parts.slice(1);
+                for (var i = 0; i < parts.length; i++) {
+                    if (!parent[parts[i]]) parent[parts[i]] = {};
+                    parent = parent[parts[i]];
+                }
+                return parent;
+            };
+            MyLib.namespace('utils.array'); MyLib.namespace('utils.string'); MyLib.namespace('utils.object');
+            MyLib.namespace('dom.element'); MyLib.namespace('events');
+            MyLib.version = '1.0.0';
+            MyLib.utils = MyLib.utils || {};
+            MyLib.utils.array = MyLib.utils.array || {};
+            MyLib.utils.string = MyLib.utils.string || {};
+            MyLib.utils.object = MyLib.utils.object || {};
+            MyLib.dom = MyLib.dom || {};
+            MyLib.dom.element = MyLib.dom.element || {};
+            MyLib.events = MyLib.events || {};
+            
+            MyLib.utils.array.unique = function(arr) {
+                if (_ && _.uniq) return _.uniq(arr);
+                return [...new Set(arr)];
+            };
+            MyLib.utils.array.flatten = function(arr) {
+                if (_ && _.flatten) return _.flatten(arr);
+                return arr.reduce(function(acc, val) {
+                    return acc.concat(Array.isArray(val) ? MyLib.utils.array.flatten(val) : val);
+                }, []);
+            };
+            MyLib.utils.string.capitalize = function(str) { return str.charAt(0).toUpperCase() + str.slice(1); };
+            MyLib.utils.string.template = function(str, data) {
+                return str.replace(/\{(\w+)\}/g, function(match, key) {
+                    return data.hasOwnProperty(key) ? data[key] : match;
+                });
+            };
+            MyLib.utils.object.merge = function(target) {
+                var sources = Array.prototype.slice.call(arguments, 1);
+                sources.forEach(function(source) {
+                    if (source) Object.keys(source).forEach(function(key) {
+                        if (source.hasOwnProperty(key)) target[key] = source[key];
+                    });
+                });
+                return target;
+            };
+            MyLib.events.EventEmitter = function() { this.events = {}; };
+            MyLib.events.EventEmitter.prototype.on = function(event, handler) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(handler);
+                return this;
+            };
+            MyLib.events.EventEmitter.prototype.emit = function(event) {
+                var args = Array.prototype.slice.call(arguments, 1);
+                if (this.events[event]) this.events[event].forEach(function(h) { h.apply(this, args); }, this);
+                return this;
+            };
+            return MyLib;
+        })(window.jQuery, window._);
+        
+        // AMD Tests
+        function testAMDUnique() { document.getElementById('amd-output').innerHTML = `<strong>unique([1,2,2,3,3,4])</strong><br>Result: [${AMDMyLib.utils.array.unique([1,2,2,3,3,4])}]`; }
+        function testAMDFlatten() { document.getElementById('amd-output').innerHTML = `<strong>flatten([1,[2,3],[4,5]])</strong><br>Result: [${AMDMyLib.utils.array.flatten([1,[2,3],[4,5]])}]`; }
+        function testAMDCapitalize() { document.getElementById('amd-output').innerHTML = `<strong>capitalize("hello world")</strong><br>Result: "${AMDMyLib.utils.string.capitalize("hello world")}"`; }
+        function testAMDTrim() { document.getElementById('amd-output').innerHTML = `<strong>trim("  hello  ")</strong><br>Result: "${AMDMyLib.utils.string.trim("  hello  ")}"`; }
+        
+        // CommonJS Tests
+        function testCJSUnique() { document.getElementById('cjs-output').innerHTML = `<strong>unique([1,2,2,3,3,4])</strong><br>Result: [${CJSMyLib.utils.array.unique([1,2,2,3,3,4])}]`; }
+        function testCJSGroupBy() {
+            var users = [{name:'John',city:'NYC'},{name:'Jane',city:'LA'},{name:'Bob',city:'NYC'}];
+            var result = CJSMyLib.utils.array.groupBy(users, 'city');
+            document.getElementById('cjs-output').innerHTML = `<strong>groupBy(users, 'city')</strong><br>Result: ${JSON.stringify(result)}`;
+        }
+        function testCJSChunk() { document.getElementById('cjs-output').innerHTML = `<strong>chunk([1,2,3,4,5,6,7,8], 3)</strong><br>Result: ${JSON.stringify(CJSMyLib.utils.array.chunk([1,2,3,4,5,6,7,8], 3))}`; }
+        function testCJSSlugify() { document.getElementById('cjs-output').innerHTML = `<strong>slugify("Hello World! Test.")</strong><br>Result: "${CJSMyLib.utils.string.slugify("Hello World! Test.")}"`; }
+        function testCJSPick() { document.getElementById('cjs-output').innerHTML = `<strong>pick({a:1,b:2,c:3}, ['a','c'])</strong><br>Result: ${JSON.stringify(CJSMyLib.utils.object.pick({a:1,b:2,c:3}, ['a','c']))}`; }
+        
+        // UMD Tests
+        function testUMDEventEmitter() {
+            var ee = new UMDMyLib.events.EventEmitter();
+            var logs = [];
+            ee.on('test', function(msg) { logs.push('Received: ' + msg); });
+            ee.on('test', function(msg) { logs.push('Also: ' + msg); });
+            ee.emit('test', 'Hello World');
+            document.getElementById('umd-output').innerHTML = `<strong>EventEmitter Test</strong><br>${logs.join('<br>')}`;
+        }
+        function testUMDUnique() { document.getElementById('umd-output').innerHTML = `<strong>unique([1,2,2,3,3,4])</strong><br>Result: [${UMDMyLib.utils.array.unique([1,2,2,3,3,4])}]`; }
+        function testUMDTemplate() { document.getElementById('umd-output').innerHTML = `<strong>template("Hello {name}", {name:"John"})</strong><br>Result: "${UMDMyLib.utils.string.template("Hello {name}", {name:"John"})}"`; }
+        function testUMDMerge() { document.getElementById('umd-output').innerHTML = `<strong>merge({a:1}, {b:2}, {c:3})</strong><br>Result: ${JSON.stringify(UMDMyLib.utils.object.merge({}, {a:1}, {b:2}, {c:3}))}`; }
+    </script>
+</body>
+</html>

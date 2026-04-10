@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.2 - Nested Namespacing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 10px; }
+        .subtitle { color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 30px; }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .card h3 { color: #764ba2; margin: 15px 0 10px 0; }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { transform: translateY(-2px); }
+        .output {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Lab 12.2: Nested Namespacing</h1>
+        <p class="subtitle">MyApp Library with Hierarchical Namespaces</p>
+        
+        <div class="grid">
+            <!-- Array Utilities -->
+            <div class="card">
+                <h2>Array Utilities <span class="badge">utils.array</span></h2>
+                <button onclick="testUnique()">unique()</button>
+                <button onclick="testChunk()">chunk()</button>
+                <button onclick="testShuffle()">shuffle()</button>
+                <button onclick="testDifference()">difference()</button>
+                <div id="array-output" class="output">Ready...</div>
+            </div>
+            
+            <!-- String Utilities -->
+            <div class="card">
+                <h2>String Utilities <span class="badge">utils.string</span></h2>
+                <button onclick="testCapitalize()">capitalize()</button>
+                <button onclick="testTitleize()">titleize()</button>
+                <button onclick="testSlugify()">slugify()</button>
+                <button onclick="testTemplate()">template()</button>
+                <div id="string-output" class="output">Ready...</div>
+            </div>
+            
+            <!-- Date & Number Utilities -->
+            <div class="card">
+                <h2>Date & Number <span class="badge">utils.date / number</span></h2>
+                <button onclick="testDateFormat()">format date</button>
+                <button onclick="testDaysDiff()">days diff</button>
+                <button onclick="testRandom()">random number</button>
+                <button onclick="testFormatNumber()">format number</button>
+                <div id="date-output" class="output">Ready...</div>
+            </div>
+            
+            <!-- Storage Plugin -->
+            <div class="card">
+                <h2>Storage Plugin <span class="badge">plugins.storage</span></h2>
+                <input type="text" id="storage-key" placeholder="Key" value="user">
+                <input type="text" id="storage-value" placeholder="Value" value='{"name":"John"}'><br>
+                <button onclick="testStorageSet()">save</button>
+                <button onclick="testStorageGet()">load</button>
+                <button onclick="testStorageRemove()">remove</button>
+                <div id="storage-output" class="output">Ready...</div>
+            </div>
+            
+            <!-- Validation Plugin -->
+            <div class="card">
+                <h2>Validation Plugin <span class="badge">plugins.validation</span></h2>
+                <input type="text" id="email" placeholder="Email">
+                <button onclick="testValidateEmail()">Validate Email</button>
+                <button onclick="testValidateForm()">Validate Form</button>
+                <div id="validation-output" class="output">Ready...</div>
+            </div>
+            
+            <!-- Router Plugin -->
+            <div class="card">
+                <h2>Router Plugin <span class="badge">plugins.router</span></h2>
+                <button onclick="testRouterHome()">/home</button>
+                <button onclick="testRouterUser()">/user/123</button>
+                <button onclick="testRouterPost()">/post/hello-world</button>
+                <div id="router-output" class="output">Ready...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📖 Namespace Hierarchy</h2>
+            <pre id="namespace-tree"></pre>
+        </div>
+    </div>
+    
+    <script src="namespace/core.js"></script>
+    <script src="namespace/utils.js"></script>
+    <script src="namespace/plugins.js"></script>
+    
+    <script>
+        // Array tests
+        function testUnique() {
+            var arr = [1, 2, 2, 3, 3, 4, 5];
+            var result = MyApp.utils.array.unique(arr);
+            document.getElementById('array-output').innerHTML = `<strong>unique([${arr}])</strong><br>Result: [${result}]`;
+        }
+        
+        function testChunk() {
+            var arr = [1, 2, 3, 4, 5, 6, 7, 8];
+            var result = MyApp.utils.array.chunk(arr, 3);
+            document.getElementById('array-output').innerHTML = `<strong>chunk([1..8], 3)</strong><br>Result: ${JSON.stringify(result)}`;
+        }
+        
+        function testShuffle() {
+            var arr = [1, 2, 3, 4, 5];
+            var result = MyApp.utils.array.shuffle(arr);
+            document.getElementById('array-output').innerHTML = `<strong>shuffle([1,2,3,4,5])</strong><br>Result: [${result}]`;
+        }
+        
+        function testDifference() {
+            var result = MyApp.utils.array.difference([1, 2, 3, 4, 5], [2, 4]);
+            document.getElementById('array-output').innerHTML = `<strong>difference([1,2,3,4,5], [2,4])</strong><br>Result: [${result}]`;
+        }
+        
+        // String tests
+        function testCapitalize() {
+            var result = MyApp.utils.string.capitalize('hello world');
+            document.getElementById('string-output').innerHTML = `<strong>capitalize("hello world")</strong><br>Result: "${result}"`;
+        }
+        
+        function testTitleize() {
+            var result = MyApp.utils.string.titleize('hello world from myapp');
+            document.getElementById('string-output').innerHTML = `<strong>titleize("hello world from myapp")</strong><br>Result: "${result}"`;
+        }
+        
+        function testSlugify() {
+            var result = MyApp.utils.string.slugify('Hello World! This is a test.');
+            document.getElementById('string-output').innerHTML = `<strong>slugify("Hello World! This is a test.")</strong><br>Result: "${result}"`;
+        }
+        
+        function testTemplate() {
+            var result = MyApp.utils.string.template('Hello {name}, welcome to {city}!', {name: 'John', city: 'New York'});
+            document.getElementById('string-output').innerHTML = `<strong>template("Hello {name}, welcome to {city}")</strong><br>Result: "${result}"`;
+        }
+        
+        // Date/Number tests
+        function testDateFormat() {
+            var result = MyApp.utils.date.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
+            document.getElementById('date-output').innerHTML = `<strong>format(new Date(), "YYYY-MM-DD HH:mm:ss")</strong><br>Result: "${result}"`;
+        }
+        
+        function testDaysDiff() {
+            var result = MyApp.utils.date.daysDiff('2024-01-01', '2024-01-10');
+            document.getElementById('date-output').innerHTML = `<strong>daysDiff("2024-01-01", "2024-01-10")</strong><br>Result: ${result} days`;
+        }
+        
+        function testRandom() {
+            var result = MyApp.utils.number.random(1, 100);
+            document.getElementById('date-output').innerHTML = `<strong>random(1, 100)</strong><br>Result: ${result}`;
+        }
+        
+        function testFormatNumber() {
+            var result = MyApp.utils.number.format(1234567);
+            document.getElementById('date-output').innerHTML = `<strong>format(1234567)</strong><br>Result: "${result}"`;
+        }
+        
+        // Storage tests
+        function testStorageSet() {
+            var key = document.getElementById('storage-key').value;
+            var value = document.getElementById('storage-value').value;
+            try {
+                var parsed = JSON.parse(value);
+                MyApp.plugins.storage.set(key, parsed);
+                document.getElementById('storage-output').innerHTML = `<strong>Saved:</strong> ${key} = ${value}`;
+            } catch(e) {
+                document.getElementById('storage-output').innerHTML = `<strong>Error:</strong> Invalid JSON`;
+            }
+        }
+        
+        function testStorageGet() {
+            var key = document.getElementById('storage-key').value;
+            var result = MyApp.plugins.storage.get(key);
+            document.getElementById('storage-output').innerHTML = `<strong>Loaded:</strong> ${key} = ${JSON.stringify(result)}`;
+        }
+        
+        function testStorageRemove() {
+            var key = document.getElementById('storage-key').value;
+            MyApp.plugins.storage.remove(key);
+            document.getElementById('storage-output').innerHTML = `<strong>Removed:</strong> ${key}`;
+        }
+        
+        // Validation tests
+        function testValidateEmail() {
+            var email = document.getElementById('email').value;
+            var isValid = MyApp.plugins.validation.isEmail(email);
+            document.getElementById('validation-output').innerHTML = `<strong>isEmail("${email}")</strong><br>Result: ${isValid ? '✅ Valid' : '❌ Invalid'}`;
+        }
+        
+        function testValidateForm() {
+            var result = MyApp.plugins.validation.validate(
+                { name: 'John', email: 'john@test.com', age: 25 },
+                {
+                    name: { required: true, minLength: 2 },
+                    email: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+                    age: { min: 18, max: 99 }
+                }
+            );
+            document.getElementById('validation-output').innerHTML = `<strong>validate(form, rules)</strong><br>Valid: ${result.valid}<br>Errors: ${JSON.stringify(result.errors)}`;
+        }
+        
+        // Router tests
+        function testRouterHome() {
+            MyApp.plugins.router.addRoute('/home', function(params) {
+                document.getElementById('router-output').innerHTML = `<strong>Route: /home</strong><br>Handler called! No params.`;
+            });
+            MyApp.plugins.router.navigate('/home');
+        }
+        
+        function testRouterUser() {
+            MyApp.plugins.router.addRoute('/user/:id', function(params) {
+                document.getElementById('router-output').innerHTML = `<strong>Route: /user/:id</strong><br>Handler called! Params: ${JSON.stringify(params)}`;
+            });
+            MyApp.plugins.router.navigate('/user/123');
+        }
+        
+        function testRouterPost() {
+            MyApp.plugins.router.addRoute('/post/:slug', function(params) {
+                document.getElementById('router-output').innerHTML = `<strong>Route: /post/:slug</strong><br>Handler called! Params: ${JSON.stringify(params)}`;
+            });
+            MyApp.plugins.router.navigate('/post/hello-world');
+        }
+        
+        // Display namespace hierarchy
+        function showNamespaceTree() {
+            var tree = 'MyApp\n├── core (v' + MyApp.core.version + ')\n├── utils\n│   ├── array\n│   ├── string\n│   ├── date\n│   └── number\n├── dom\n│   ├── query\n│   └── style\n├── events\n└── plugins\n    ├── storage\n    ├── validation\n    └── router';
+            document.getElementById('namespace-tree').textContent = tree;
+        }
+        
+        showNamespaceTree();
+        
+        console.log('MyApp loaded:', MyApp);
+        console.log('Version:', MyApp.core.version);
+    </script>
+</body>
+</html>
