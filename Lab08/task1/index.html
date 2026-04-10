@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flyweight Pattern - Forest Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #f0e6d0;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #c4a86b;
+            margin-bottom: 20px;
+        }
+
+        .forest-container {
+            background: #2d5a2c;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+            background: #2d5a2c;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 8px;
+            color: #f0e6d0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #f0e6d0;
+        }
+
+        .info code {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .status {
+            margin-top: 10px;
+            text-align: center;
+            color: #ffd700;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌲 Flyweight Pattern: Forest Generator</h1>
+        <div class="subtitle">10,000 trees using only 4 shared tree types</div>
+
+        <div class="forest-container">
+            <canvas id="forestCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <button class="btn-primary" id="generateBtn">🌳 Generate 10,000 Trees</button>
+            <button class="btn-secondary" id="renderBtn">🎨 Render Forest</button>
+            <button class="btn-danger" id="clearBtn">🗑️ Clear</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-label">Trees in Memory</div>
+                <div class="stat-value" id="treeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Unique Tree Types</div>
+                <div class="stat-value" id="uniqueTypes">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Memory Saved</div>
+                <div class="stat-value" id="memorySaved">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Factory Requests</div>
+                <div class="stat-value" id="totalRequests">0</div>
+            </div>
+        </div>
+        
+        <div class="status" id="statusMsg">Ready. Click Generate to create 10,000 trees!</div>
+
+        <div class="info">
+            <strong>🎯 Flyweight Pattern in Action:</strong><br>
+            • <strong>Intrinsic State</strong> (shared): species, colors, dimensions — stored once per tree type (4 total)<br>
+            • <strong>Extrinsic State</strong> (unique): x, y, scale, rotation — stored per tree instance (10,000)<br>
+            • <strong>Without Flyweight:</strong> 10,000 objects × 8 properties = 80,000 data points<br>
+            • <strong>With Flyweight:</strong> 4 tree types + 10,000 positions = ~10,004 data points<br>
+            • <strong>Memory savings: ~87% reduction!</strong>
+        </div>
+    </div>
+
+    <script type="module">
+        import { ForestRenderer } from "./forest/ForestRenderer.js";
+        
+        // Get canvas element
+        const canvas = document.getElementById("forestCanvas");
+        
+        // Set fixed canvas size
+        canvas.width = 1000;
+        canvas.height = 500;
+        
+        // Create renderer
+        const renderer = new ForestRenderer(canvas);
+        
+        function updateStats() {
+            const stats = renderer.getStats();
+            document.getElementById("treeCount").textContent = renderer.trees.length;
+            document.getElementById("uniqueTypes").textContent = stats.uniqueTreeTypes;
+            document.getElementById("memorySaved").textContent = stats.memorySaved;
+            document.getElementById("totalRequests").textContent = stats.totalRequests;
+        }
+        
+        function setStatus(msg) {
+            document.getElementById("statusMsg").textContent = msg;
+        }
+        
+        // Generate button
+        document.getElementById("generateBtn").addEventListener("click", () => {
+            setStatus("🌳 Generating 10,000 trees...");
+            
+            // Use setTimeout to avoid UI freeze
+            setTimeout(() => {
+                const count = renderer.generateForest(10000);
+                updateStats();
+                setStatus(`✅ Generated ${count} trees! Click Render to see them.`);
+                console.log("Generated", count, "trees");
+            }, 10);
+        });
+        
+        // Render button
+        document.getElementById("renderBtn").addEventListener("click", () => {
+            if (renderer.trees.length === 0) {
+                setStatus("⚠️ No trees! Click Generate first.");
+                return;
+            }
+            
+            setStatus("🎨 Rendering forest...");
+            
+            setTimeout(() => {
+                renderer.render();
+                setStatus(`✅ Rendered ${renderer.trees.length} trees on canvas!`);
+                console.log("Rendered", renderer.trees.length, "trees");
+            }, 10);
+        });
+        
+        // Clear button
+        document.getElementById("clearBtn").addEventListener("click", () => {
+            renderer.clear();
+            updateStats();
+            setStatus("🗑️ Cleared all trees. Generate new forest!");
+            console.log("Cleared all trees");
+        });
+        
+        // Auto-generate and render on page load
+        setStatus("🌳 Auto-generating 10,000 trees...");
+        setTimeout(() => {
+            renderer.generateForest(10000);
+            updateStats();
+            setStatus("🎨 Auto-rendering...");
+            setTimeout(() => {
+                renderer.render();
+                setStatus("✅ Ready! 10,000 trees rendered with Flyweight pattern!");
+                console.log("Auto-rendered", renderer.trees.length, "trees");
+            }, 100);
+        }, 100);
+    </script>
+</body>
+</html>

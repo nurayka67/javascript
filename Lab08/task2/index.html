@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Delegation - Smart Todo List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #e0d4ff;
+            margin-bottom: 20px;
+        }
+
+        .todo-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .todo-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .add-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .add-section input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-section select {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .btn-add {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #5a67d8;
+        }
+
+        .batch-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-batch {
+            padding: 10px 20px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-batch:hover {
+            background: #38a169;
+        }
+
+        .btn-clear {
+            background: #e53e3e;
+        }
+
+        .btn-clear:hover {
+            background: #c53030;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stat-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .todo-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+
+        .todo-item:hover {
+            background: #f8f9fa;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #adb5bd;
+        }
+
+        .todo-checkbox {
+            margin-right: 15px;
+        }
+
+        .todo-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 8px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .todo-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.1s;
+        }
+
+        .todo-actions button:hover {
+            transform: scale(1.05);
+        }
+
+        .priority-btn.high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .priority-btn.normal {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .priority-btn.low {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .edit-btn {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .delete-btn {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .todo-item.priority-high {
+            border-left: 4px solid #e53e3e;
+        }
+
+        .todo-item.priority-normal {
+            border-left: 4px solid #ed8936;
+        }
+
+        .todo-item.priority-low {
+            border-left: 4px solid #48bb78;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .info code {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Event Delegation: Smart Todo List</h1>
+        <div class="subtitle">1,000+ items with only 3 event listeners!</div>
+
+        <div class="todo-card">
+            <div class="todo-header">
+                <div class="add-section">
+                    <input type="text" id="todoInput" placeholder="Add a new task...">
+                    <select id="prioritySelect">
+                        <option value="low">🟢 Low Priority</option>
+                        <option value="normal" selected>🟡 Normal Priority</option>
+                        <option value="high">🔴 High Priority</option>
+                    </select>
+                    <button class="btn-add" id="addBtn">+ Add</button>
+                </div>
+                <div class="batch-controls">
+                    <button class="btn-batch" id="add100Btn">➕ Add 100 Items</button>
+                    <button class="btn-batch" id="add1000Btn">➕➕ Add 1,000 Items</button>
+                    <button class="btn-batch btn-clear" id="clearBtn">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <span class="stat-badge" id="totalCount">Total: 0</span>
+                <span class="stat-badge" id="completedCount">Completed: 0</span>
+                <span class="stat-badge" id="eventCount">Event Listeners: 3</span>
+            </div>
+
+            <div class="todo-list" id="todoList"></div>
+        </div>
+
+        <div class="info">
+            <strong>🎯 Event Delegation Pattern in Action:</strong><br>
+            • <strong>Traditional approach:</strong> 1,000 items = 1,000+ event listeners → slow, memory heavy<br>
+            • <strong>Event Delegation:</strong> Single listener on parent catches all events via bubbling<br>
+            • <strong>Benefits:</strong> O(1) vs O(n) memory, automatic support for dynamic content<br>
+            • <strong>How it works:</strong> Click → bubbles up → parent checks <code>event.target.dataset.action</code>
+        </div>
+    </div>
+
+    <script type="module">
+        import { TodoList } from "./todo/TodoList.js";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const todoList = new TodoList("todoList");
+            
+            // Элементы UI
+            const todoInput = document.getElementById("todoInput");
+            const prioritySelect = document.getElementById("prioritySelect");
+            const addBtn = document.getElementById("addBtn");
+            const add100Btn = document.getElementById("add100Btn");
+            const add1000Btn = document.getElementById("add1000Btn");
+            const clearBtn = document.getElementById("clearBtn");
+            const totalCountSpan = document.getElementById("totalCount");
+            const completedCountSpan = document.getElementById("completedCount");
+
+            function updateStats() {
+                const stats = todoList.getStats();
+                totalCountSpan.textContent = `Total: ${stats.totalItems}`;
+                completedCountSpan.textContent = `Completed: ${stats.completedItems}`;
+            }
+
+            // Добавление одного элемента
+            addBtn.addEventListener("click", () => {
+                const text = todoInput.value.trim();
+                if (text) {
+                    todoList.addItem(text, prioritySelect.value);
+                    todoInput.value = "";
+                    updateStats();
+                }
+            });
+
+            // Enter key
+            todoInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    addBtn.click();
+                }
+            });
+
+            // Добавление 100 элементов
+            add100Btn.addEventListener("click", () => {
+                todoList.addMultipleItems(100);
+                updateStats();
+                alert("Added 100 items! Total: " + todoList.getStats().totalItems);
+            });
+
+            // Добавление 1000 элементов
+            add1000Btn.addEventListener("click", () => {
+                todoList.addMultipleItems(1000);
+                updateStats();
+                alert("Added 1000 items! Total: " + todoList.getStats().totalItems);
+            });
+
+            // Очистка
+            clearBtn.addEventListener("click", () => {
+                if (confirm("Clear all tasks?")) {
+                    todoList.clearAll();
+                    updateStats();
+                }
+            });
+
+            // Добавим несколько демо-элементов
+            todoList.addItem("Welcome to Event Delegation Demo! (Double-click to edit)", "normal");
+            todoList.addItem("Try toggling, editing, changing priority", "high");
+            todoList.addItem("Add 1000 items - see how fast it works!", "low");
+            todoList.addItem("Notice: only 3 event listeners total!", "normal");
+            
+            updateStats();
+            
+            console.log("Event Delegation Demo Ready!");
+            console.log("Event listeners count:", todoList.delegate.getEventCount());
+        });
+    </script>
+</body>
+</html>
